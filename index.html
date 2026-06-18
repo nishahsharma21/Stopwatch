@@ -21,7 +21,6 @@
             padding: 20px;
         }
 
-        /* main box */
         .stopwatch-box {
             background: white;
             border-radius: 20px;
@@ -32,7 +31,6 @@
             text-align: center;
         }
 
-        /* big time display */
         .time {
             background: #2c3e50;
             color: #0ff7c0;
@@ -45,7 +43,6 @@
             letter-spacing: 3px;
         }
 
-        /* buttons row */
         .buttons {
             display: flex;
             justify-content: center;
@@ -105,7 +102,6 @@
             opacity: 0.6;
         }
 
-        /* lap section */
         .lap-section {
             background: #f5f5f5;
             border-radius: 15px;
@@ -161,10 +157,8 @@
 <body>
 
 <div class="stopwatch-box">
-    <!-- TIME DISPLAY -->
     <div class="time" id="display">00:00:00</div>
 
-    <!-- BUTTONS -->
     <div class="buttons">
         <button class="start-btn" id="startBtn">START</button>
         <button class="pause-btn" id="pauseBtn">PAUSE</button>
@@ -172,12 +166,11 @@
         <button class="lap-btn" id="lapBtn" disabled>LAP</button>
     </div>
 
-    <!-- LAP SECTION -->
     <div class="lap-section">
         <div class="lap-title">📋 LAP TIMES</div>
         <div class="lap-list" id="lapList">
             <ul id="lapListUl">
-                <li class="empty-message">No laps yet. Press LAP to record time.</li>
+                <li class="empty-message">No laps yet.</li>
             </ul>
         </div>
         <button class="clear-btn" id="clearBtn">CLEAR ALL LAPS</button>
@@ -185,22 +178,16 @@
 </div>
 
 <script>
-    // ============================================================
-    // SIMPLE STOPWATCH - EASY TO UNDERSTAND
-    // ============================================================
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
     
-    // ---------- VARIABLES (explained) ----------
-    let hours = 0;        // counts hours (0,1,2...)
-    let minutes = 0;      // counts minutes (0-59)
-    let seconds = 0;      // counts seconds (0-59)
+    let timerRunning = false;
+    let myInterval = null;
     
-    let timerRunning = false;   // is stopwatch running? true = yes, false = no
-    let myInterval = null;      // stores the setInterval so we can stop it
+    let lapCounter = 1;
+    let lapsArray = [];
     
-    let lapCounter = 1;         // lap number (1,2,3...)
-    let lapsArray = [];         // stores all lap times as text
-    
-    // ---------- GET DOM ELEMENTS ----------
     const displayElement = document.getElementById('display');
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
@@ -209,9 +196,7 @@
     const clearBtn = document.getElementById('clearBtn');
     const lapListUl = document.getElementById('lapListUl');
     
-    // ---------- FUNCTION: UPDATE DISPLAY (shows time on screen) ----------
     function updateDisplay() {
-        // Format: always show two digits (01, 02, etc)
         let hoursStr = hours.toString().padStart(2, '0');
         let minutesStr = minutes.toString().padStart(2, '0');
         let secondsStr = seconds.toString().padStart(2, '0');
@@ -219,7 +204,6 @@
         displayElement.textContent = `${hoursStr}:${minutesStr}:${secondsStr}`;
     }
     
-    // ---------- FUNCTION: INCREASE TIME (called every 1 second) ----------
     function increaseTime() {
         seconds = seconds + 1;
         
@@ -233,134 +217,95 @@
             hours = hours + 1;
         }
         
-        updateDisplay();  // show new time on screen
+        updateDisplay();
     }
     
-    // ---------- FUNCTION: START STOPWATCH ----------
     function startStopwatch() {
-        // if already running, do nothing
         if (timerRunning === true) {
             return;
         }
         
-        // start the timer: every 1000ms (1 second) call increaseTime
         myInterval = setInterval(increaseTime, 1000);
         timerRunning = true;
         
-        // enable lap button when stopwatch starts
         lapBtn.disabled = false;
     }
     
-    // ---------- FUNCTION: PAUSE STOPWATCH ----------
     function pauseStopwatch() {
-        // if not running, do nothing
         if (timerRunning === false) {
             return;
         }
         
-        // stop the interval
         clearInterval(myInterval);
         timerRunning = false;
         
-        // disable lap button when paused
         lapBtn.disabled = true;
     }
     
-    // ---------- FUNCTION: RESET STOPWATCH (set all to zero) ----------
     function resetStopwatch() {
-        // stop the timer first
         if (timerRunning === true) {
             clearInterval(myInterval);
             timerRunning = false;
         }
         
-        // reset all time variables
         hours = 0;
         minutes = 0;
         seconds = 0;
         
-        // update display to show 00:00:00
         updateDisplay();
         
-        // disable lap button when reset
         lapBtn.disabled = true;
     }
     
-    // ---------- FUNCTION: RECORD A LAP (save current time) ----------
     function recordLap() {
-        // get current time as formatted string
         let hoursStr = hours.toString().padStart(2, '0');
         let minutesStr = minutes.toString().padStart(2, '0');
         let secondsStr = seconds.toString().padStart(2, '0');
         
         let currentTime = `${hoursStr}:${minutesStr}:${secondsStr}`;
         
-        // save lap to array
         lapsArray.push({
             number: lapCounter,
             time: currentTime
         });
         
-        // increase lap counter for next lap
         lapCounter = lapCounter + 1;
         
-        // update the lap list on screen
         showLapsOnScreen();
     }
     
-    // ---------- FUNCTION: SHOW ALL LAPS ON SCREEN ----------
     function showLapsOnScreen() {
-        // clear the list first
         lapListUl.innerHTML = '';
         
-        // if no laps, show empty message
         if (lapsArray.length === 0) {
-            lapListUl.innerHTML = '<li class="empty-message">No laps yet. Press LAP to record time.</li>';
+            lapListUl.innerHTML = '<li class="empty-message">No laps yet.</li>';
             return;
         }
         
-        // loop through all laps and add them to the list
         for (let i = 0; i < lapsArray.length; i++) {
             let lap = lapsArray[i];
             
-            // create a new list item
             let li = document.createElement('li');
             
-            // add text: Lap #1 - 00:00:05
             li.innerHTML = `<span>Lap #${lap.number}</span> <span>⏱️ ${lap.time}</span>`;
             
-            // add to the list
             lapListUl.appendChild(li);
         }
     }
     
-    // ---------- FUNCTION: CLEAR ALL LAPS ----------
     function clearAllLaps() {
-        // empty the array
         lapsArray = [];
-        // reset lap counter back to 1
         lapCounter = 1;
-        // update the screen
         showLapsOnScreen();
     }
     
-    // ---------- CONNECT BUTTONS TO FUNCTIONS ----------
     startBtn.addEventListener('click', startStopwatch);
     pauseBtn.addEventListener('click', pauseStopwatch);
     resetBtn.addEventListener('click', resetStopwatch);
     lapBtn.addEventListener('click', recordLap);
     clearBtn.addEventListener('click', clearAllLaps);
     
-    // ---------- INITIAL DISPLAY (show 00:00:00 at start) ----------
     updateDisplay();
-    
-    // NOTE: Everything is explained with comments!
-    // The stopwatch counts seconds, minutes, hours.
-    // START = begins counting every second
-    // PAUSE = stops counting
-    // RESET = puts everything back to 0
-    // LAP = saves the current time to the list
-    // CLEAR LAPS = removes all saved laps
 </script>
 </body>
 </html>
